@@ -62,19 +62,4 @@ public class Day20 {
 
 	}
 
-
-
-	public static boolean matchPattern(List<String> sea, List<String> seamonster) {
-		int seamonsterLength = seamonster.get(0).length();
-		for (int i = 0; i < seamonsterLength; i++) {
-			for (int j = 0; j < seamonster.size(); j++) {
-				if (seamonster.get(j).charAt(i) == '#') {
-					if (sea.get(j).charAt(i) != '#') {
-						return false;
-					}
-				}
-			}
-		}
-		return true;
-	}
 }
