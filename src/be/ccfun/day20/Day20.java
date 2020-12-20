@@ -10,6 +10,7 @@ import java.util.List;
 public class Day20 {
 
 	public static void main(String[] args) throws IOException {
+		long start = System.currentTimeMillis();
 		List<String> lines = Files.readAllLines(Path.of("resources/day20.txt"));
 		Tile currentTile = null;
 		List<Tile> tiles = new ArrayList<>();
@@ -25,7 +26,6 @@ public class Day20 {
 			}
 		}
 		tiles.add(currentTile);
-		System.out.println(tiles.size());
 		BigInteger result = BigInteger.ONE;
 		int imageSize = (int) Math.sqrt(tiles.size());
 		for (Tile tile : tiles) {
@@ -34,25 +34,16 @@ public class Day20 {
 			int size = matching.size();
 			if (size == 2) {
 				result = result.multiply(BigInteger.valueOf(tile.getNumber()));
-				for (Tile neighbour : tile.getNeighbours()) {
-					System.out.println(neighbour.getNumber() + " " + tile.getMatch(neighbour));
-				}
 			}
-			System.out.println(tile.getNumber() + " " + size);
+			//System.out.println(tile.getNumber() + " " + size);
 		}
 		System.out.println(result);
 
 		Image image = new Image(imageSize);
 		Tile tile1 = tiles.stream().filter(t -> t.getNeighbours().size() == 2).findFirst().get();
-
-		tile1.print();
-		tile1.rotate();
-		System.out.println();
-		tile1.print();
-
 		image.setLeftCorner(tile1);
 		Tile tile = image.createTile();
-		tile.print();
+		//tile.print();
 
 
 		List<String> seamonster = new ArrayList<>();
@@ -60,17 +51,14 @@ public class Day20 {
 		seamonster.add("#    ##    ##    ###");
 		seamonster.add(" #  #  #  #  #  #   ");
 
-		System.out.println("ALIGNED");
-		tile.align(".#.#..#.##...#.##..#####", Direction.TOP);
-
-		System.out.println();
-		tile.print();
-
 		tile.countPatternAllDirections(seamonster);
 
 
 
+		System.out.println(System.currentTimeMillis() - start);
 
+		tile.print();
+		tile.createDominoPicuture(seamonster).savePicture(Path.of("resources/seamonster.png"));
 
 	}
 

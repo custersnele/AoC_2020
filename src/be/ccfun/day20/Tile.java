@@ -1,9 +1,11 @@
 package be.ccfun.day20;
 
+import be.ccfun.day20.domino.Domino;
+import be.ccfun.day20.domino.DominoPicture;
+import be.ccfun.day20.domino.PixelPosition;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Tile {
@@ -225,27 +227,35 @@ public class Tile {
 		System.out.println("SOL: " + countPattern(seamonster));
 		for (int i = 0; i < 4; i++) {
 			rotate();
-			printSolution(seamonster);
+			if (printSolution(seamonster)) {
+				return;
+			}
 		}
 		flipHorizontal();
 		for (int i = 0; i < 4; i++) {
 			rotate();
-			printSolution(seamonster);
+			if (printSolution(seamonster)) {
+				return;
+			}
 		}
 		flipHorizontal();
 		flipVertical();
 		for (int i = 0; i < 4; i++) {
 			rotate();
-			printSolution(seamonster);
+			if (printSolution(seamonster)) {
+				return;
+			}
 		}
 	}
 
 
-	private void printSolution(List<String> seamonster) {
+	private boolean printSolution(List<String> seamonster) {
 		int i = countPattern(seamonster);
 		if (i > 0) {
 			System.out.println("SOLUTION: " + i + " " + (count('#') - (15 * i)));
+			return true;
 		}
+		return false;
 	}
 
 
@@ -281,6 +291,36 @@ public class Tile {
 		return true;
 	}
 
+	private List<PixelPosition> calculateMonsterPixels(List<String> seamonster) {
+		int seamonsterLength = seamonster.get(0).length();
+		List<PixelPosition> monsterpositions = new ArrayList<>();
+		for (int col = 0; col < image.get(0).length() - seamonsterLength; col++) {
+			for (int row = 0; row < image.size() - 2; row++) {
+				List<String> seaPart = new ArrayList<>();
+				for (int i = 0; i < 3; i++) {
+					seaPart.add(image.get(row+i).substring(col));
+				}
+				if (matchPattern(seaPart, seamonster)) {
+					monsterpositions.addAll(findMonsterPixels(seaPart, seamonster, row, col));
+				}
+			}
+		}
+		return monsterpositions;
+	}
+
+	public List<PixelPosition> findMonsterPixels(List<String> sea, List<String> seamonster, int row, int col) {
+		List<PixelPosition> positions = new ArrayList<>();
+		int seamonsterLength = seamonster.get(0).length();
+		for (int i = 0; i < seamonsterLength; i++) {
+			for (int j = 0; j < seamonster.size(); j++) {
+				if (seamonster.get(j).charAt(i) == '#' && sea.get(j).charAt(i) == '#') {
+						positions.add(new PixelPosition( row + j, col + i));
+				}
+			}
+		}
+		return positions;
+	}
+
 
 	public int count(char character) {
 		int count = 0;
@@ -288,6 +328,34 @@ public class Tile {
 			count += (int) line.chars().filter(c -> c == character).count();
 		}
 		return count;
+	}
+
+	public DominoPicture<Integer> createDominoPicuture(List<String> seamonster) {
+		DominoPicture<Integer> picture = new DominoPicture<>();
+		List<PixelPosition> monsterPixels = calculateMonsterPixels(seamonster);
+		for (int row = 0 ; row < image.size(); row++) {
+			for (int col = 0; col < image.get(0).length(); col+=2) {
+				int left = charToInt(row, col, monsterPixels);
+				int right = charToInt(row, col+1, monsterPixels);
+				picture.add(new PixelPosition(row, col/2), new Domino<>(left, right));
+			}
+		}
+		return picture;
+	}
+
+	private int charToInt(int row, int col, List<PixelPosition> monsterpixels) {
+		if (monsterpixels.contains(new PixelPosition(row, col))) {
+			return 9;
+		}
+		try {
+			if (image.get(row).charAt(col) == '#') {
+				return 3;
+			} else {
+				return 1;
+			}
+		} catch (StringIndexOutOfBoundsException e) {
+			return 0;
+		}
 	}
 
 
