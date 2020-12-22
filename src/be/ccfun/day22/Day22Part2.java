@@ -62,7 +62,6 @@ public class Day22Part2 {
 			} else if (card1 > card2) {
 				player1.addLast(card1);
 				player1.addLast(card2);
-				System.out.println();
 			} else {
 				player2.addLast(card2);
 				player2.addLast(card1);
