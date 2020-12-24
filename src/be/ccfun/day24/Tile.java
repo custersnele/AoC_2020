@@ -1,19 +1,19 @@
 package be.ccfun.day24;
 
-import java.sql.DriverManager;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class Tile {
+public class Tile implements Comparable<Tile> {
 	private static int count;
 	private Tile[] neighbours = new Tile[6];
 	private int id;
-	private boolean white;
-	private List<Integer> aka = new ArrayList<>();
+	private Color color;
+
 
 	public Tile() {
 		this.id = count++;
-		this.white = true;
+		this.color = Color.WHITE;
 	}
 
 	public void createNeighbours() {
@@ -22,10 +22,117 @@ public class Tile {
 				setNeighbour(direction, new Tile());
 			}
 		}
+		// controle w - sw buur
+		Tile westSoutwestNeighbour = neighbours[Direction.w.ordinal()].neighbours[Direction.sw.ordinal()];
+		if (westSoutwestNeighbour != null) {
+			Tile swNeighbour = neighbours[Direction.sw.ordinal()];
+			swNeighbour.setNeighbour(Direction.w, westSoutwestNeighbour);
+		}
+		// controle sw - w buur
+		Tile southwestWestNeighbour = neighbours[Direction.sw.ordinal()].neighbours[Direction.w.ordinal()];
+		if (southwestWestNeighbour != null) {
+			Tile wNeighbour = neighbours[Direction.w.ordinal()];
+			wNeighbour.setNeighbour(Direction.sw, southwestWestNeighbour);
+		}
+		// controle w - nw buur
+		Tile westNorthwestNeighbour = neighbours[Direction.w.ordinal()].neighbours[Direction.nw.ordinal()];
+		if (westNorthwestNeighbour != null) {
+			Tile nwNeighbour = neighbours[Direction.nw.ordinal()];
+			nwNeighbour.setNeighbour(Direction.w, westNorthwestNeighbour);
+		}
+		// controle nw - w buur
+		Tile northwestWestNeighbour = neighbours[Direction.nw.ordinal()].neighbours[Direction.w.ordinal()];
+		if (northwestWestNeighbour != null) {
+			Tile wNeighbour = neighbours[Direction.w.ordinal()];
+			wNeighbour.setNeighbour(Direction.nw, northwestWestNeighbour);
+		}
+		// controle nw - e buur ??
+		/*Tile northwestEastNeighbour = neighbours[Direction.nw.ordinal()].neighbours[Direction.e.ordinal()];
+		if (northwestEastNeighbour != null) {
+			Tile wNeighbour = neighbours[Direction.w.ordinal()];
+			wNeighbour.setNeighbour(Direction.nw, northwestEastNeighbour);
+		}*/
+		// controle e - ne buur
+		Tile eastNortheastNeighbour = neighbours[Direction.e.ordinal()].neighbours[Direction.ne.ordinal()];
+		if (eastNortheastNeighbour != null) {
+			Tile neNeighbour = neighbours[Direction.ne.ordinal()];
+			neNeighbour.setNeighbour(Direction.e, eastNortheastNeighbour);
+		}
+		// controle ne - e buur
+		Tile northeastEastNeighbour = neighbours[Direction.ne.ordinal()].neighbours[Direction.e.ordinal()];
+		if (northeastEastNeighbour != null) {
+			Tile eNeighbour = neighbours[Direction.e.ordinal()];
+			eNeighbour.setNeighbour(Direction.ne, northeastEastNeighbour);
+		}
+		// controle e - se buur
+		Tile eastSoutheastNeighbour = neighbours[Direction.e.ordinal()].neighbours[Direction.se.ordinal()];
+		if (eastSoutheastNeighbour != null) {
+			Tile seNeighbour = neighbours[Direction.se.ordinal()];
+			seNeighbour.setNeighbour(Direction.e, eastSoutheastNeighbour);
+		}
+		// controle se - e buur
+		Tile southeastEastNeighbour = neighbours[Direction.se.ordinal()].neighbours[Direction.e.ordinal()];
+		if (southeastEastNeighbour != null) {
+			Tile eNeighbour = neighbours[Direction.e.ordinal()];
+			eNeighbour.setNeighbour(Direction.se, southeastEastNeighbour);
+		}
+		// controle nw - ne buur
+		Tile nwneneighbour = neighbours[Direction.nw.ordinal()].neighbours[Direction.ne.ordinal()];
+		if (nwneneighbour != null) {
+			Tile neNeighbour = neighbours[Direction.ne.ordinal()];
+			neNeighbour.setNeighbour(Direction.nw, nwneneighbour);
+		}
+		// controle ne - nw buur
+		Tile nenwneighbour = neighbours[Direction.ne.ordinal()].neighbours[Direction.nw.ordinal()];
+		if (nenwneighbour != null) {
+			Tile nwNeighbour = neighbours[Direction.nw.ordinal()];
+			nwNeighbour.setNeighbour(Direction.ne, nenwneighbour);
+		}
+		// controle se - sw buur
+		Tile seswneighbour = neighbours[Direction.se.ordinal()].neighbours[Direction.sw.ordinal()];
+		if (seswneighbour != null) {
+			Tile swNeighbour = neighbours[Direction.sw.ordinal()];
+			swNeighbour.setNeighbour(Direction.se, seswneighbour);
+		}
+		// controle sw - se buur
+		Tile swseneighbour = neighbours[Direction.sw.ordinal()].neighbours[Direction.se.ordinal()];
+		if (swseneighbour != null) {
+			Tile seNeighbour = neighbours[Direction.se.ordinal()];
+			seNeighbour.setNeighbour(Direction.sw, swseneighbour);
+		}
 	}
 
-	public void addAka(int id) {
-		aka.add(id);
+	/*
+	Any black tile with zero or more than 2 black tiles immediately adjacent to it is flipped to white.
+Any white tile with exactly 2 black tiles immediately adjacent to it is flipped to black.
+	 */
+	public Color nextColor() {
+		long countBlack = Arrays.stream(neighbours).filter(t -> t != null).filter(t -> t.isBlack()).count();
+		if (isWhite()) {
+			if (countBlack == 2) {
+				return Color.BLACK;
+			} else {
+				return Color.WHITE;
+			}
+		} else {
+			if (countBlack == 0 || countBlack > 2) {
+				return Color.WHITE;
+			} else {
+				return Color.BLACK;
+			}
+		}
+	}
+
+	public List<Tile> getNeighbours() {
+		return Arrays.stream(neighbours).collect(Collectors.toList());
+	}
+
+	public int getNumberOfNeighbours() {
+		return (int) Arrays.stream(neighbours).filter(n -> n != null).count();
+	}
+
+	public boolean isBlack() {
+		return color == Color.BLACK;
 	}
 
 	public void setId(int id) {
@@ -33,12 +140,12 @@ public class Tile {
 	}
 
 	public boolean isWhite() {
-		return white;
+		return color == Color.WHITE;
 	}
 
 	public void flip() {
-		white = !white;
-		System.out.println("Flip " + id + " to " + (white? "white" : "black"));
+		color = Color.values()[(color.ordinal() + 1) % Color.values().length];
+		System.out.println("Flip " + id + " to " + (isWhite()? "white" : "black"));
 	}
 
 	public Tile go(Direction direction) {
@@ -47,9 +154,10 @@ public class Tile {
 		return neighbour;
 	}
 
-	public void setWhite(boolean white) {
-		this.white = white;
+	public void setColor(Color color) {
+		this.color = color;
 	}
+
 
 	@Override
 	public boolean equals(Object o) {
@@ -70,10 +178,6 @@ public class Tile {
 		return id;
 	}
 
-	public List<Integer> getAka() {
-		return aka;
-	}
-
 	public int getId() {
 		return id;
 	}
@@ -91,15 +195,12 @@ public class Tile {
 		if (neighbour.equals(existingNeighbour)) {
 			return;
 		}
-		/*if (existingNeighbour != null && existingNeighbour.getAka().contains(neighbour.getId())) {
-			return;
-		}
 		if (existingNeighbour != null) {
 			System.out.println("PROBLEM");
-			//existingNeighbour.addAka(neighbour.getId());
-			TileUtil.merge(existingNeighbour, neighbour);
-			neighbour = existingNeighbour;
-		}*/
+			System.out.println(this);
+			System.out.println(existingNeighbour);
+			System.out.println(neighbour);
+		}
 		neighbours[direction.ordinal()] = neighbour;
 		Direction opposite = DirectionUtil.getOpposite(direction);
 		neighbour.neighbours[opposite.ordinal()] = this;
@@ -126,5 +227,14 @@ public class Tile {
 			}
 		}
 		return builder.toString();
+	}
+
+	public Color getColor() {
+		return color;
+	}
+
+	@Override
+	public int compareTo(Tile o) {
+		return id - o.id;
 	}
 }

@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Day24 {
 
@@ -20,13 +22,38 @@ public class Day24 {
 			List<Direction> simplify = simplify(getDirections(line));
 			List<Tile> tiles = flipTiles(center, simplify);
 			allTiles.addAll(tiles);
+
 		}
-		List<Integer> remove = new ArrayList<>();
-		for (Tile tile : allTiles) {
-			remove.addAll(tile.getAka());
+		System.out.println(allTiles.stream().filter(t -> t.isBlack()).count());
+		System.out.println(allTiles.size());
+		for (int day = 1; day <= 100; day++) {
+			// for all black tiles, make sure the neighbours are in allTiles
+			/*List<Tile> newNeighbours = new ArrayList<>();
+			for (Tile tile: allTiles) {
+				if (tile.isBlack() && tile.getNumberOfNeighbours() < 6) {
+					tile.createNeighbours();
+					newNeighbours.addAll(tile.getNeighbours());
+				}
+			}
+			allTiles.addAll(newNeighbours);*/
+			List<Tile> blackNeighbours = new ArrayList<>();
+			allTiles.stream().peek(t -> t.createNeighbours()).map(t -> t.getNeighbours()).forEach(l -> blackNeighbours.addAll(l));
+			allTiles.addAll(blackNeighbours);
+			List<Integer> blackTiles = new ArrayList<>();
+			for (Tile tile : allTiles) {
+				if (tile.nextColor() == Color.BLACK) {
+					blackTiles.add(tile.getId());
+				}
+			}
+			allTiles.forEach(t -> {
+				if (blackTiles.contains(t.getId())) {
+					t.setColor(Color.BLACK);
+				} else {
+					t.setColor(Color.WHITE);
+				}
+			});
+			System.out.println(day + " " + allTiles.stream().filter(t -> t.isBlack()).count());
 		}
-		System.out.println(remove);
-		System.out.println(allTiles.stream().filter(t -> !remove.contains(t.getId())).filter(t -> !t.isWhite()).count());
 	}
 
 	public static List<Direction> getDirections(String directions) {
@@ -52,6 +79,7 @@ public class Day24 {
 		for (Direction direction : directions) {
 			tile = tile.go(direction);
 			visited.add(tile);
+			visited.addAll(tile.getNeighbours());
 		}
 		tile.flip();
 		return visited;
