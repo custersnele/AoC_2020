@@ -13,15 +13,24 @@ public class Tile implements Comparable<Tile> {
 
 	public Tile() {
 		this.id = count++;
+		if (id == 417) {
+			System.out.println("debug");
+		}
 		this.color = Color.WHITE;
 	}
 
 	public void createNeighbours() {
+		boolean tile232Created = false;
 		for (Direction direction : Direction.values()) {
 			if (neighbours[direction.ordinal()] == null) {
-				setNeighbour(direction, new Tile());
+				Tile neighbour = new Tile();
+				if (neighbour.getId() == 417) {
+					tile232Created = true;
+				}
+				setNeighbour(direction, neighbour);
 			}
 		}
+
 		// controle w - sw buur
 		Tile westSoutwestNeighbour = neighbours[Direction.w.ordinal()].neighbours[Direction.sw.ordinal()];
 		if (westSoutwestNeighbour != null) {
@@ -86,7 +95,9 @@ public class Tile implements Comparable<Tile> {
 		Tile nenwneighbour = neighbours[Direction.ne.ordinal()].neighbours[Direction.nw.ordinal()];
 		if (nenwneighbour != null) {
 			Tile nwNeighbour = neighbours[Direction.nw.ordinal()];
+			nenwneighbour.setNeighbour(Direction.sw, nwNeighbour);
 			nwNeighbour.setNeighbour(Direction.ne, nenwneighbour);
+
 		}
 		// controle se - sw buur
 		Tile seswneighbour = neighbours[Direction.se.ordinal()].neighbours[Direction.sw.ordinal()];
@@ -99,6 +110,13 @@ public class Tile implements Comparable<Tile> {
 		if (swseneighbour != null) {
 			Tile seNeighbour = neighbours[Direction.se.ordinal()];
 			seNeighbour.setNeighbour(Direction.sw, swseneighbour);
+		}
+		if (tile232Created) {
+			System.out.println("***** 417 ******");
+			System.out.println(this);
+			for (Direction direction : Direction.values()) {
+				System.out.println(neighbours[direction.ordinal()]);
+			}
 		}
 	}
 
